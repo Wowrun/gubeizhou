@@ -78,6 +78,11 @@ body {
 .nav-toggle {
     display: none;
     cursor: pointer;
+    padding: 10px;
+    background-color: transparent;
+    border: none;
+    border-radius: 5px;
+    transition: all 0.3s ease;
 }
 
 .bar {
@@ -87,6 +92,39 @@ body {
     margin: 5px auto;
     background-color: #34495e;
     transition: all 0.3s ease;
+    border-radius: 1.5px;
+}
+
+/* 汉堡菜单响应式优化 */
+@media screen and (max-width: 768px) {
+    .nav-toggle {
+        display: block;
+        position: relative;
+        z-index: 1001;
+    }
+    
+    .nav-toggle:hover {
+        background-color: rgba(52, 152, 219, 0.1);
+    }
+    
+    /* 优化汉堡菜单按钮的样式 */
+    .nav-toggle .bar {
+        width: 22px;
+        height: 2.5px;
+        margin: 4px auto;
+    }
+    
+    /* 优化打开状态的样式 */
+    .nav-toggle.active {
+        background-color: rgba(52, 152, 219, 0.1);
+    }
+    
+    /* 确保导航菜单在手机端正确显示 */
+    .nav-menu {
+        background-color: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
 }
 
 /* 横幅样式 */
@@ -953,6 +991,37 @@ body {
     align-items: center;
     justify-content: flex-start;
     overflow: hidden;
+}
+
+/* 视频区域响应式优化 */
+@media screen and (max-width: 768px) {
+    .video-preview-section .video-showcase-container {
+        max-width: 95%;
+        padding: 20px 15px 10px;
+    }
+    
+    .video-showcase-player {
+        margin: 0 auto 8px;
+        border-radius: 6px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .video-preview-section .video-showcase-container {
+        max-width: 100%;
+        padding: 15px 10px 8px;
+    }
+    
+    .video-showcase-player {
+        margin: 0 auto 6px;
+        border-radius: 4px;
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* 确保iframe在手机端正确显示 */
+    .video-showcase-player iframe {
+        border-radius: 4px;
+    }
 }
 
 .video-showcase-content {
