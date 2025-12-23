@@ -1904,12 +1904,8 @@ function loadFromLocalStorage() {
                 videoUrlInput.value = parsedData.douyinVideoUrl;
             }
             
-            // 直接加载视频到两个iframe，不依赖loadDouyinVideo函数的权限检查
-            loadVideoToIframe('douyin-video', parsedData.douyinVideoUrl, false);
-            loadVideoToIframe('douyin-video-mobile', parsedData.douyinVideoUrl, true);
-            
-            // 检测设备并切换视频
-            checkDeviceAndSwitchVideo();
+            // 加载视频内容（电脑端使用恢复的抖音视频，手机端使用指定MP4视频）
+            loadVideoContent();
         }
     }
 }
@@ -1961,37 +1957,29 @@ function checkDeviceAndSwitchVideo() {
     }
 }
 
-// 加载视频到iframe
-function loadVideoToIframe(iframeId, videoUrl, isMobile = false) {
-    const iframe = document.getElementById(iframeId);
-    if (!iframe || !videoUrl) return;
-    
-    try {
-        let videoId;
-        
-        // 解析抖音视频链接，提取视频ID
-        if (videoUrl.includes('douyin.com/video/')) {
-            // https://www.douyin.com/video/xxxxxxxxxxxxx 格式
-            videoId = videoUrl.split('video/')[1].split('?')[0];
-        } else if (videoUrl.includes('v.douyin.com/')) {
-            // 短链接格式暂时不处理，需要服务器支持
-            videoId = null;
-        } else {
-            // 非抖音链接，直接使用
-            iframe.src = videoUrl;
-            return;
-        }
-        
-        if (videoId) {
-            // 生成抖音嵌入链接
-            const baseUrl = `https://open.douyin.com/player/video?vid=${videoId}&autoplay=0`;
-            // 手机端添加低分辨率参数
-            const embedUrl = isMobile ? `${baseUrl}&quality=480p` : baseUrl;
-            iframe.src = embedUrl;
-        }
-    } catch (error) {
-        console.error('加载视频失败:', error);
+// 加载视频到iframe或video标签
+function loadVideoContent() {
+    // 电脑端：使用原来的抖音视频
+    const desktopIframe = document.getElementById('douyin-video');
+    if (desktopIframe) {
+        // 加载原来的抖音视频
+        desktopIframe.src = 'https://open.douyin.com/player/video?vid=7587021980650507561&autoplay=0';
     }
+    
+    // 手机端：始终使用指定的MP4视频
+    const mobileVideo = document.getElementById('mobile-video-player');
+    if (mobileVideo) {
+        // 设置手机端视频源
+        const mobileVideoSource = mobileVideo.querySelector('source');
+        if (mobileVideoSource) {
+            mobileVideoSource.src = 'https://s3plus.meituan.net/opapisdk/op_ticket_1_5673241091_1766506184178_qdqqd_qrq0z6.mp4';
+            // 重新加载视频
+            mobileVideo.load();
+        }
+    }
+    
+    // 检测设备并切换视频
+    checkDeviceAndSwitchVideo();
 }
 
 // 设置默认网站数据
@@ -2052,12 +2040,8 @@ function setDefaultWebsiteData() {
         videoUrlInput.value = defaultData.douyinVideoUrl;
     }
     
-    // 直接加载视频到两个iframe
-    loadVideoToIframe('douyin-video', defaultData.douyinVideoUrl, false);
-    loadVideoToIframe('douyin-video-mobile', defaultData.douyinVideoUrl, true);
-    
-    // 检测设备并切换视频
-    checkDeviceAndSwitchVideo();
+    // 加载视频内容（电脑端使用默认抖音视频，手机端使用指定MP4视频）
+    loadVideoContent();
     
     // 保存到本地存储
     saveToLocalStorage();
