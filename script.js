@@ -2078,6 +2078,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 监听窗口大小变化，动态切换视频
     window.addEventListener('resize', checkDeviceAndSwitchVideo);
+    
+    // 确保在设备检测后再次更新权限显示，确保手机端也应用相同的权限控制
+    setTimeout(updatePermissionDisplay, 100);
 });
 
 // 保存当前用户到本地存储
