@@ -1406,22 +1406,34 @@ function updatePermissionDisplay() {
     // 检查是否登录
     const isLoggedIn = !!currentUser;
     
-    // 为所有编辑按钮添加权限控制
+    // 方法1：使用CSS类控制权限显示（更可靠，适用于所有设备）
+    if (!isLoggedIn) {
+        document.body.classList.add('no-permission');
+    } else {
+        document.body.classList.remove('no-permission');
+    }
+    
+    // 方法2：直接控制按钮显示（冗余控制，确保万无一失）
     const editButtons = document.querySelectorAll('.edit-btn, .add-btn, .action-btn');
     editButtons.forEach(btn => {
+        // 获取按钮的父容器
         const parent = btn.closest('section') || btn.closest('.container') || btn.closest('footer');
-        if (parent) {
-            if (!isLoggedIn || 
-                (parent.id === 'settings' && !hasPermission('edit-activities')) ||
-                (parent.id === 'about' && !hasPermission('edit-activities')) ||
-                (parent.id === 'footer' && !hasPermission('edit-all')) ||
-                (parent.id === 'members' && 
-                 (!hasPermission('edit-all') && !hasPermission('edit-member-bg'))) ||
-                (parent.id === 'activities' && !hasPermission('edit-activities'))) {
-                btn.style.display = 'none';
-            } else {
-                btn.style.display = 'block';
-            }
+        
+        // 根据登录状态和权限决定是否显示按钮
+        let shouldShow = isLoggedIn;
+        
+        if (shouldShow && parent) {
+            // 检查特定区域的权限
+            shouldShow = hasPermission('edit-activities') || 
+                       (parent.id === 'members' && hasPermission('edit-member-bg')) ||
+                       (parent.id === 'footer' && hasPermission('edit-all'));
+        }
+        
+        // 强制设置显示状态
+        btn.style.display = shouldShow ? 'block' : 'none';
+        // 确保CSS类也能生效
+        if (!shouldShow) {
+            btn.style.display = 'none';
         }
     });
 }
