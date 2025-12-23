@@ -1892,31 +1892,12 @@ function loadFromLocalStorage() {
                 videoUrlInput.value = parsedData.douyinVideoUrl;
             }
             
-            // 直接加载视频，不依赖loadDouyinVideo函数的权限检查
-            const videoIframe = document.getElementById('douyin-video');
-            if (videoIframe && parsedData.douyinVideoUrl) {
-                try {
-                    let videoId;
-                    const videoUrl = parsedData.douyinVideoUrl;
-                    
-                    // 解析抖音视频链接，提取视频ID
-                    if (videoUrl.includes('douyin.com/video/')) {
-                        // https://www.douyin.com/video/xxxxxxxxxxxxx 格式
-                        videoId = videoUrl.split('video/')[1].split('?')[0];
-                    } else if (videoUrl.includes('v.douyin.com/')) {
-                        // 短链接格式暂时不处理，需要服务器支持
-                        videoId = null;
-                    }
-                    
-                    if (videoId) {
-                        // 生成抖音嵌入链接
-                        const embedUrl = `https://open.douyin.com/player/video?vid=${videoId}&autoplay=0`;
-                        videoIframe.src = embedUrl;
-                    }
-                } catch (error) {
-                    console.error('加载抖音视频失败:', error);
-                }
-            }
+            // 直接加载视频到两个iframe，不依赖loadDouyinVideo函数的权限检查
+            loadVideoToIframe('douyin-video', parsedData.douyinVideoUrl, false);
+            loadVideoToIframe('douyin-video-mobile', parsedData.douyinVideoUrl, true);
+            
+            // 检测设备并切换视频
+            checkDeviceAndSwitchVideo();
         }
     }
 }
@@ -1944,6 +1925,59 @@ function initDefaultRoles() {
     }
     
     saveToLocalStorage();
+}
+
+// 检测是否为移动设备
+function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+// 视频设备检测和切换函数
+function checkDeviceAndSwitchVideo() {
+    const desktopIframe = document.getElementById('douyin-video');
+    const mobileIframe = document.getElementById('douyin-video-mobile');
+    
+    // 根据设备类型切换视频显示
+    if (isMobileDevice()) {
+        desktopIframe.style.display = 'none';
+        mobileIframe.style.display = 'block';
+    } else {
+        desktopIframe.style.display = 'block';
+        mobileIframe.style.display = 'none';
+    }
+}
+
+// 加载视频到iframe
+function loadVideoToIframe(iframeId, videoUrl, isMobile = false) {
+    const iframe = document.getElementById(iframeId);
+    if (!iframe || !videoUrl) return;
+    
+    try {
+        let videoId;
+        
+        // 解析抖音视频链接，提取视频ID
+        if (videoUrl.includes('douyin.com/video/')) {
+            // https://www.douyin.com/video/xxxxxxxxxxxxx 格式
+            videoId = videoUrl.split('video/')[1].split('?')[0];
+        } else if (videoUrl.includes('v.douyin.com/')) {
+            // 短链接格式暂时不处理，需要服务器支持
+            videoId = null;
+        } else {
+            // 非抖音链接，直接使用
+            iframe.src = videoUrl;
+            return;
+        }
+        
+        if (videoId) {
+            // 生成抖音嵌入链接
+            const baseUrl = `https://open.douyin.com/player/video?vid=${videoId}&autoplay=0`;
+            // 手机端添加低分辨率参数
+            const embedUrl = isMobile ? `${baseUrl}&quality=480p` : baseUrl;
+            iframe.src = embedUrl;
+        }
+    } catch (error) {
+        console.error('加载视频失败:', error);
+    }
 }
 
 // 设置默认网站数据
@@ -2004,31 +2038,12 @@ function setDefaultWebsiteData() {
         videoUrlInput.value = defaultData.douyinVideoUrl;
     }
     
-    // 直接加载视频
-    const videoIframe = document.getElementById('douyin-video');
-    if (videoIframe && defaultData.douyinVideoUrl) {
-        try {
-            let videoId;
-            const videoUrl = defaultData.douyinVideoUrl;
-            
-            // 解析抖音视频链接，提取视频ID
-            if (videoUrl.includes('douyin.com/video/')) {
-                // https://www.douyin.com/video/xxxxxxxxxxxxx 格式
-                videoId = videoUrl.split('video/')[1].split('?')[0];
-            } else if (videoUrl.includes('v.douyin.com/')) {
-                // 短链接格式暂时不处理，需要服务器支持
-                videoId = null;
-            }
-            
-            if (videoId) {
-                // 生成抖音嵌入链接
-                const embedUrl = `https://open.douyin.com/player/video?vid=${videoId}&autoplay=0`;
-                videoIframe.src = embedUrl;
-            }
-        } catch (error) {
-            console.error('加载抖音视频失败:', error);
-        }
-    }
+    // 直接加载视频到两个iframe
+    loadVideoToIframe('douyin-video', defaultData.douyinVideoUrl, false);
+    loadVideoToIframe('douyin-video-mobile', defaultData.douyinVideoUrl, true);
+    
+    // 检测设备并切换视频
+    checkDeviceAndSwitchVideo();
     
     // 保存到本地存储
     saveToLocalStorage();
@@ -2057,6 +2072,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 更新导航栏和功能显示
     updateNavigationAndFeatures();
+    
+    // 检测设备并切换视频
+    checkDeviceAndSwitchVideo();
+    
+    // 监听窗口大小变化，动态切换视频
+    window.addEventListener('resize', checkDeviceAndSwitchVideo);
 });
 
 // 保存当前用户到本地存储
