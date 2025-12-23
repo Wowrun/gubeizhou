@@ -1947,15 +1947,17 @@ function isMobileDevice() {
 // 视频设备检测和切换函数
 function checkDeviceAndSwitchVideo() {
     const desktopIframe = document.getElementById('douyin-video');
-    const mobileIframe = document.getElementById('douyin-video-mobile');
+    const mobileVideo = document.getElementById('mobile-video-player');
     
     // 根据设备类型切换视频显示
     if (isMobileDevice()) {
-        desktopIframe.style.display = 'none';
-        mobileIframe.style.display = 'block';
+        // 显示手机端视频（MP4）
+        if (desktopIframe) desktopIframe.style.display = 'none';
+        if (mobileVideo) mobileVideo.style.display = 'block';
     } else {
-        desktopIframe.style.display = 'block';
-        mobileIframe.style.display = 'none';
+        // 显示电脑端视频（抖音iframe）
+        if (desktopIframe) desktopIframe.style.display = 'block';
+        if (mobileVideo) mobileVideo.style.display = 'none';
     }
 }
 
